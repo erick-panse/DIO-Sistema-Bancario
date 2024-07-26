@@ -1,7 +1,9 @@
 import textwrap
 from abc import ABC,abstractmethod
-from datetime import datetime, timezone
+from datetime import datetime
+from pathlib import Path
 
+ROOT_PATH = Path(__file__).parent
 
 class Cliente:
     def __init__(self,endereco):
@@ -25,6 +27,9 @@ class Pessoa_fisica(Cliente):
         self.cpf = cpf
         self.nome = nome
         self.data_nascimento = data_nascimento
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__}: ({self.cpf})>"
 
 class Conta:
     def __init__(self,numero,cliente):
@@ -115,6 +120,9 @@ class Conta_corrente(Conta):
             C/C:\t{self.numero}
             Titular:\t{self.cliente.nome}
         """
+    
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: ('{self.agencia}', '{self.numero}', '{self.cliente.nome}')>"
 
 class Historico:
     def __init__(self):
@@ -222,7 +230,12 @@ def menu():
 def log_transacao(func):
     def envelope(*args, **kwargs):
         resultado = func(*args, **kwargs)
-        print(f"{datetime.now()}: {func.__name__.upper()}")
+        data_hora = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        
+        with open(ROOT_PATH / "log.txt", "a", encoding="utf-8") as arquivo:
+            arquivo.write(f"[{data_hora}] Função '{func.__name__}' executada com argumentos {args} e {kwargs}. Retornou {resultado} \n")
+
+        print(f"{data_hora}: {func.__name__.upper()}")
         return resultado
 
     return envelope
@@ -367,3 +380,4 @@ def Main():
             print("Operação inválida, por favor selecione novamente a operação desejada.")
 
 Main()
+
